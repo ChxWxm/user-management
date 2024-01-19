@@ -1,10 +1,10 @@
 package com.usermangement.wallet;
 
 public class Wallet {
-    private final Integer id;
-    private final String name;
+    private final int id;
+    private String name;
 
-    private final String email;
+    private String email;
 
     public Wallet(int id, String name, String email) {
         this.id = id;
@@ -22,5 +22,9 @@ public class Wallet {
 
     public String getEmail() {
         return email;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
