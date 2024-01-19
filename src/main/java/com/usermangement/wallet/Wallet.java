@@ -4,9 +4,12 @@ public class Wallet {
     private final Integer id;
     private final String name;
 
-    public Wallet(int id, String name) {
+    private final String email;
+
+    public Wallet(int id, String name, String email) {
         this.id = id;
         this.name = name;
+        this.email = email;
     }
 
     public int getId() {
@@ -15,5 +18,9 @@ public class Wallet {
 
     public String getName() {
         return name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 }

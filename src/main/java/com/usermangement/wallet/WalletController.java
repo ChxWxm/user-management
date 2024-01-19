@@ -1,5 +1,6 @@
 package com.usermangement.wallet;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.validation.annotation.Validated;
@@ -24,7 +25,7 @@ public class WalletController {
     }
 
     @PostMapping("")
-    public Wallet createWallet(@Validated @RequestBody WalletRequest request) throws Exception {
+    public Wallet createWallet(@Validated @RequestBody WalletRequest request) {
         return walletService.createWallet(request);
     }
 
@@ -37,6 +38,8 @@ public class WalletController {
 record WalletRequest(
         @NotNull
         @Size(min = 3, max = 30)
-        String name
+        String name,
+        @Email
+        String email
 ) {
 }
