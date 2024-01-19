@@ -1,5 +1,6 @@
 package com.usermangement;
 
+import com.usermangement.mail.GoogleMailService;
 import com.usermangement.mail.MailService;
 import com.usermangement.mail.OutlookMailService;
 import org.springframework.boot.SpringApplication;
@@ -14,7 +15,12 @@ public class UserManagementApplication {
     }
 
     @Bean
-    public MailService mailService() {
+    public MailService outlookMailService() {
         return new OutlookMailService();
+    }
+
+    @Bean
+    public MailService googleMailService() {
+        return new GoogleMailService();
     }
 }

@@ -1,6 +1,8 @@
 package com.usermangement.user;
 
 import com.usermangement.mail.MailService;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -14,12 +16,10 @@ public class UserService {
             List.of(
                     new User(1, "John", 20, true),
                     new User(2, "Jane", 29, false),
-                    new User(3, "Alice", 34, true)
-            )
-    );
+                    new User(3, "Alice", 34, true)));
     private final MailService mailService;
 
-    public UserService(MailService mailService) {
+    public UserService(@Qualifier("outlookMailService") MailService mailService) {
         this.mailService = mailService;
     }
 
@@ -34,12 +34,12 @@ public class UserService {
         Optional<Integer> maxId = users.stream().map(User::getId).max(Integer::compareTo);
         int currentId = maxId.orElse(0) + 1;
 
-        //  INFO: my version
-        //  User user = new User(users.size() + 1, request.name(), request.age(), true);
+        // INFO: my version
+        // User user = new User(users.size() + 1, request.name(), request.age(), true);
         User user = new User(currentId, request.name(), request.age(), true);
         users.add(user);
 
-        //  Sent Email
+        // Sent Email
         mailService.sendMail("dev@gmail.com", "User Created");
         return user;
     }

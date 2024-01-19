@@ -1,21 +1,18 @@
 package com.usermangement.mail;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class GoogleMailService implements MailService {
-    private String to;
+    @Value("${mail-provider.google.url}")
+    private String url;
+    @Value("${mail-provider.google.url-port}")
     private String port;
+
 
     public GoogleMailService() {
     }
 
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
-    }
-
     public void sendMail(String to, String body) {
-        System.out.println("Send by Google");
+        System.out.println("Send by Google" + " url: " + url + " port: " + port);
     }
 }
