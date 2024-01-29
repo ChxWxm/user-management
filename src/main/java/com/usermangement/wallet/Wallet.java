@@ -1,18 +1,32 @@
 package com.usermangement.wallet;
 
+import com.usermangement.profile.Profile;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+@Entity
+@Table(name = "wallet")
 public class Wallet {
-    private final Integer id;
-    private final String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    private final String email;
+    @Column(name = "wallet_name")
+    @NotNull
+    @Size(min = 3, max = 20)
+    private String name;
 
-    public Wallet(int id, String name, String email) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
+    private Boolean active;
+
+    @ManyToOne
+    @JoinColumn(name = "profile_email", referencedColumnName = "email")
+    private Profile profile;
+
+    public Wallet() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -20,7 +34,23 @@ public class Wallet {
         return name;
     }
 
-    public String getEmail() {
-        return email;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }
