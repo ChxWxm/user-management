@@ -1,68 +1,76 @@
 package com.usermangement.wallet;
-
-import com.usermangement.exception.DuplicationException;
-import com.usermangement.exception.InternalServiceException;
-import com.usermangement.exception.NotFoundException;
-import com.usermangement.mail.MailService;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.usermangement.exception.BadRequestException;
+import com.usermangement.profile.Profile;
+import com.usermangement.profile.ProfileRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class WalletService {
+    private final WalletRepository walletRepository;
+    private final ProfileRepository profileRepository;
 
-    private MailService mailService;
-
-    public WalletService(@Qualifier("googleMailService") MailService mailService) {
-        this.mailService = mailService;
+    public WalletService(WalletRepository walletRepository, ProfileRepository profileRepository) {
+        this.walletRepository = walletRepository;
+        this.profileRepository = profileRepository;
     }
 
-    private final List<Wallet> wallets = new ArrayList<>(List.of(
-            new Wallet(1, "Jack", "jack@gmail.com"),
-            new Wallet(2, "Alice", "alice@gmail.com")));
-
-    List<Wallet> getWallets(Optional<String> name) {
-        try {
-            // callNormalService();
-            if (name.isPresent()) {
-                return wallets.stream().filter(w -> w.getName().equals(name.get())).toList();
-            }
-            return wallets;
-        } catch (Exception e) {
-            throw new InternalServiceException("Internal service exception with Normal service");
-        }
+    List<Wallet> getWallets() {
+        return walletRepository.findAll();
     }
 
-    Wallet createWallet(WalletRequest request) {
-        // This is the way to use lamda method
-        // Optional<Integer> maxId =
-        // wallets.stream().map(Wallet::getId).max(Integer::compareTo);
-        System.out.println("email: " + request.email());
-        Optional<Wallet> duplicateWallet = wallets.stream()
-                .filter(wallet -> wallet.getEmail().equals(request.email()))
-                .findFirst();
-        if (duplicateWallet.isPresent()) {
-            throw new DuplicationException("Wallet email " + request.email() + " already exist.");
+    @Transactional // make sure if one of operation in this code failed, all data must not be saved in db
+    Wallet createWallet(WalletRequest request) throws Exception {
+        Optional<Profile> profileOptional = profileRepository.findByEmail(request.email());
+        Profile profile;
+        if (profileOptional.isPresent()) {
+            profile = profileOptional.get();
+        } else {
+            profile = new Profile();
+            profile.setName(request.name());
+            profile.setEmail(request.email());
+            profileRepository.save(profile);
         }
 
-        Optional<Integer> maxId = wallets.stream().map(w -> w.getId()).max((idA, idB) -> idA.compareTo(idB));
-        Integer currentId = maxId.orElse(0) + 1;
-        Wallet wallet = new Wallet(currentId, request.name(), request.email());
-        wallets.add(wallet);
-
-        mailService.sendMail("admin@wallet.com", "Wallet has created.");
+        Wallet wallet = new Wallet();
+        wallet.setName(request.name());
+        wallet.setActive(true);
+        wallet.setProfile(profile);
+        walletRepository.save(wallet);
         return wallet;
     }
 
     Wallet getWalletById(Integer id) {
-        return wallets.stream().filter(w -> w.getId() == id).findFirst()
-                .orElseThrow(() -> new NotFoundException("Wallet Not found by id " + id));
+        Optional<Wallet> walletOptional = walletRepository.findById(Long.valueOf(id));
+        if (walletOptional.isEmpty()) {
+            throw new BadRequestException("Wallet id " + id + " not found.");
+        }
+        return walletOptional.get();
     }
 
-    private void callNormalService() {
-        throw new RuntimeException();
+    Wallet updateWalletById(Integer id, UpdateWalletRequest request) {
+        Optional<Wallet> walletOptional = walletRepository.findById(Long.valueOf(id));
+        if (walletOptional.isEmpty()) {
+            throw new BadRequestException("Wallet id " + id + " not found.");
+        }
+        Wallet wallet = walletOptional.get();
+        wallet.setName(request.name());
+        walletRepository.save(wallet);
+        return wallet;
+    }
+
+    void deleteById(Integer id) {
+        walletRepository.deleteById(Long.valueOf(id));
+    }
+
+    void activeAllWallet() {
+        walletRepository.setAllWalletActive();
+    }
+
+    void deleteAllWalletIdMoreThan2() {
+        walletRepository.deleteAllWalletIdMoreThan2();
     }
 }

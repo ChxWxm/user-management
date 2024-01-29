@@ -6,3 +6,14 @@ mail-provider:
 spring:
   profiles:
     active: dev
+  # Database Config
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wallet
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  # JPA & Hibernate
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
